@@ -2,23 +2,28 @@ import os
 from dotenv import load_dotenv
 from src.graph import OutReachAutomation
 from src.state import *
-from src.tools.leads_loader.airtable import AirtableLeadLoader
-from src.tools.leads_loader.google_sheets import GoogleSheetLeadLoader
+from src.tools.leads_loader.apollo import ApolloLeadLoader
+from src.tools.leads_loader.supabase_loader import SupabaseLeadLoader
 
 # Load environment variables from a .env file
 load_dotenv()
 
 if __name__ == "__main__":
-    # Use Airtable for accessing your leads list
-    lead_loader = AirtableLeadLoader(
-        access_token=os.getenv("AIRTABLE_ACCESS_TOKEN"),
-        base_id=os.getenv("AIRTABLE_BASE_ID"),
-        table_name=os.getenv("AIRTABLE_TABLE_NAME"),
+    # Option 1: Use Apollo.io with CSV export
+    lead_loader = ApolloLeadLoader(
+        csv_file_path=os.getenv("APOLLO_CSV_PATH")
     )
-    
-    # Use Sheet for accessing your leads list
-    # lead_loader = GoogleSheetLeadLoader(
-    #     spreadsheet_id=os.getenv("SHEET_ID"),
+
+    # Option 2: Use Apollo.io API (requires API key)
+    # lead_loader = ApolloLeadLoader(
+    #     api_key=os.getenv("APOLLO_API_KEY")
+    # )
+
+    # Option 3: Use Supabase for persistent storage (when needed)
+    # lead_loader = SupabaseLeadLoader(
+    #     supabase_url=os.getenv("SUPABASE_URL"),
+    #     supabase_key=os.getenv("SUPABASE_KEY"),
+    #     table_name=os.getenv("SUPABASE_TABLE_NAME", "leads")
     # )
     
     # Instantiate the OutReachAutomation class

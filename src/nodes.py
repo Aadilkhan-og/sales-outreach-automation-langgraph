@@ -10,7 +10,7 @@ from .tools.rag_tool import fetch_similar_case_study
 from .prompts import *
 from .state import LeadData, CompanyData, Report, GraphInputState, GraphState
 from .structured_outputs import WebsiteData, EmailResponse
-from .utils import invoke_llm, get_report, get_current_date, save_reports_locally
+from .utils import invoke_llm, get_report, get_current_date, save_reports_locally, GEMINI_FLASH_MODEL, GEMINI_PRO_MODEL
 
 # Enable or disable sending emails directly using GMAIL
 # Should be confident about the quality of the email
@@ -22,7 +22,16 @@ SAVE_TO_GOOGLE_DOCS = False
 class OutReachAutomationNodes:
     def __init__(self, loader):
         self.lead_loader = loader
-        self.docs_manager = GoogleDocsManager()
+
+        # Only initialize Google Docs Manager if feature is enabled
+        # This allows the app to run without Google OAuth credentials
+        if SAVE_TO_GOOGLE_DOCS:
+            print("[INFO] Initializing Google Docs Manager (SAVE_TO_GOOGLE_DOCS enabled)...")
+            self.docs_manager = GoogleDocsManager()
+        else:
+            print("[INFO] Google Docs Manager disabled (SAVE_TO_GOOGLE_DOCS=False)")
+            self.docs_manager = None
+
         self.drive_folder_name = ""
 
     def get_new_leads(self, state: GraphInputState):
@@ -72,7 +81,6 @@ class OutReachAutomationNodes:
         print(Fore.YELLOW + "----- Searching Lead data on LinkedIn -----\n" + Style.RESET_ALL)
         lead_data = state["current_lead"]
         company_data = state.get("company_data", CompanyData())
-        
         # Scrape lead linkedin profile
         (
             lead_profile, 
@@ -111,7 +119,7 @@ class OutReachAutomationNodes:
             website_info = invoke_llm(
                 system_prompt=WEBSITE_ANALYSIS_PROMPT.format(main_url=company_website), 
                 user_message=content,
-                model="gemini-1.5-flash",
+                model=GEMINI_FLASH_MODEL,
                 response_format=WebsiteData
             )
 
@@ -138,7 +146,7 @@ class OutReachAutomationNodes:
         general_lead_search_report = invoke_llm(
             system_prompt=LEAD_SEARCH_REPORT_PROMPT, 
             user_message=inputs,
-            model="gemini-1.5-flash"
+            model=GEMINI_FLASH_MODEL
         )
         
         lead_search_report = Report(
@@ -169,7 +177,7 @@ class OutReachAutomationNodes:
             blog_analysis_report = invoke_llm(
                 system_prompt=prompt, 
                 user_message=blog_content,
-                model="gemini-1.5-flash"
+                model=GEMINI_FLASH_MODEL
             )
             blog_analysis_report = Report(
                 title="Blog Analysis Report",
@@ -188,35 +196,39 @@ class OutReachAutomationNodes:
         facebook_url = company_data.social_media_links.facebook
         twitter_url = company_data.social_media_links.twitter
         youtube_url = company_data.social_media_links.youtube
-        
+
+        # Initialize reports list (will contain reports for available social media channels)
+        reports = []
+
         # Check If company has Youtube channel
         if youtube_url:
             youtube_data = get_youtube_stats(youtube_url)
             prompt = YOUTUBE_ANALYSIS_PROMPT.format(company_name=company_data.name)
             youtube_insight = invoke_llm(
-                system_prompt=prompt, 
+                system_prompt=prompt,
                 user_message=youtube_data,
-                model="gemini-1.5-flash"
+                model=GEMINI_FLASH_MODEL
             )
             youtube_analysis_report = Report(
                 title="Youtube Analysis Report",
                 content=youtube_insight,
                 is_markdown=True
             )
-            
+            reports.append(youtube_analysis_report)
+
         # Check If company has Facebook account
         if facebook_url:
             # TODO Add Facebook analysis part
             pass
-        
+
         # Check If company has Twitter account
         if twitter_url:
             # TODO Add Twitter analysis part
             pass
-        
+
         return {
             "company_data": company_data,
-            "reports": [youtube_analysis_report]
+            "reports": reports
         }
     
     def analyze_recent_news(self, state: GraphState):
@@ -236,11 +248,14 @@ class OutReachAutomationNodes:
         )
         
         # Craft news analysis prompt
-        news_insight = invoke_llm(
-            system_prompt=news_analysis_prompt, 
-            user_message=recent_news,
-            model="gemini-1.5-flash"
-        )
+        if not recent_news.strip():
+            news_insight = "No recent news found for this company."
+        else:
+            news_insight = invoke_llm(
+                system_prompt=news_analysis_prompt,
+                user_message=recent_news,
+                model=GEMINI_FLASH_MODEL
+            )
         
         news_analysis_report = Report(
             title="News Analysis Report",
@@ -289,7 +304,7 @@ class OutReachAutomationNodes:
         digital_presence_report = invoke_llm(
             system_prompt=prompt, 
             user_message=inputs,
-            model="gemini-1.5-flash"
+            model=GEMINI_FLASH_MODEL
         ) 
         
         digital_presence_report = Report(
@@ -325,7 +340,7 @@ class OutReachAutomationNodes:
         full_report = invoke_llm(
             system_prompt=prompt, 
             user_message=inputs,
-            model="gemini-1.5-flash"
+            model=GEMINI_FLASH_MODEL
         )
         
         global_research_report = Report(
@@ -348,12 +363,12 @@ class OutReachAutomationNodes:
         # Load reports
         reports = state["reports"]
         global_research_report = get_report(reports, "Global Lead Analysis Report")
-        
+        print("global_research_report",global_research_report,"reports",reports)
         # Scoring lead
         lead_score = invoke_llm(
             system_prompt=SCORE_LEAD_PROMPT,
             user_message=global_research_report,
-            model="gemini-1.5-pro"
+            model=GEMINI_PRO_MODEL
         )
         return {"lead_score": lead_score.strip()}
 
@@ -418,7 +433,7 @@ class OutReachAutomationNodes:
         custom_outreach_report = invoke_llm(
             system_prompt=GENERATE_OUTREACH_REPORT_PROMPT,
             user_message=inputs,
-            model="gemini-1.5-pro"
+            model=GEMINI_PRO_MODEL
         )
         
         # TODO Find better way to include correct links into the final report
@@ -438,22 +453,31 @@ class OutReachAutomationNodes:
         revised_outreach_report = invoke_llm(
             system_prompt=PROOF_READER_PROMPT,
             user_message=inputs,
-            model="gemini-1.5-flash"
+            model=GEMINI_FLASH_MODEL
         )
-        
-        # Store report into google docs and get shareable link
-        new_doc = self.docs_manager.add_document(
-            content=revised_outreach_report,
-            doc_title="Outreach Report",
-            folder_name=self.drive_folder_name,
-            make_shareable=True,
-            folder_shareable=True, # Set to false if only personal or true if with a team
-            markdown=True
-        )  
-        
+
+        # Store report into google docs and get shareable link (if enabled)
+        custom_report_link = None
+        folder_link = None
+
+        if SAVE_TO_GOOGLE_DOCS and self.docs_manager:
+            new_doc = self.docs_manager.add_document(
+                content=revised_outreach_report,
+                doc_title="Outreach Report",
+                folder_name=self.drive_folder_name,
+                make_shareable=True,
+                folder_shareable=True, # Set to false if only personal or true if with a team
+                markdown=True
+            )
+            if new_doc:
+                custom_report_link = new_doc.get("shareable_url")
+                folder_link = new_doc.get("folder_url")
+        else:
+            print("[INFO] Skipping Google Docs upload (feature disabled or not configured)")
+
         return {
-            "custom_outreach_report_link": new_doc["shareable_url"],
-            "reports_folder_link": new_doc["folder_url"]
+            "custom_outreach_report_link": custom_report_link,
+            "reports_folder_link": folder_link
         }
 
     def generate_personalized_email(self, state: GraphState):
@@ -481,7 +505,7 @@ class OutReachAutomationNodes:
         output = invoke_llm(
             system_prompt=PERSONALIZE_EMAIL_PROMPT,
             user_message=lead_data,
-            model="gemini-1.5-flash",
+            model=GEMINI_FLASH_MODEL,
             response_format=EmailResponse
         )
         
@@ -527,7 +551,7 @@ class OutReachAutomationNodes:
         spin_questions = invoke_llm(
             system_prompt=GENERATE_SPIN_QUESTIONS_PROMPT,
             user_message=global_research_report,
-            model="gemini-1.5-flash"
+            model=GEMINI_FLASH_MODEL
         )
         
         inputs = f"""
@@ -544,7 +568,7 @@ class OutReachAutomationNodes:
         interview_script = invoke_llm(
             system_prompt=WRITE_INTERVIEW_SCRIPT_PROMPT,
             user_message=inputs,
-            model="gemini-1.5-flash"
+            model=GEMINI_FLASH_MODEL
         )
         
         interview_script_doc = Report(
@@ -567,9 +591,10 @@ class OutReachAutomationNodes:
         
         # Ensure reports are saved locally
         save_reports_locally(reports)
-        
-        # Save all reports to Google docs
-        if SAVE_TO_GOOGLE_DOCS:
+
+        # Save all reports to Google docs (if enabled and configured)
+        if SAVE_TO_GOOGLE_DOCS and self.docs_manager:
+            print("[INFO] Uploading reports to Google Docs...")
             for report in reports:
                 self.docs_manager.add_document(
                     content=report.content,
@@ -577,6 +602,8 @@ class OutReachAutomationNodes:
                     folder_name=self.drive_folder_name,
                     markdown=report.is_markdown
                 )
+        else:
+            print("[INFO] Reports saved locally only (Google Docs disabled)")
 
         return state
 

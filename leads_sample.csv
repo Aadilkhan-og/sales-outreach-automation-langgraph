@@ -1,0 +1,4 @@
+# Id,Name,First Name,Last Name,Email,Title,Company,Organization,LinkedIn,Person Linkedin Url,Company LinkedIn Url,Website,Industry,Phone,City,State,Location,Status
+1,John Doe,John,Doe,john.doe@techcorp.com,Senior Software Engineer,TechCorp,TechCorp,https://linkedin.com/in/johndoe,https://linkedin.com/in/johndoe,https://linkedin.com/company/techcorp,https://techcorp.com,Technology,+1234567890,San Francisco,CA,San Francisco, CA,NEW
+2,Jane Smith,Jane,Smith,jane.smith@innovate.io,Product Manager,Innovate,Innovate,https://linkedin.com/in/janesmith,https://linkedin.com/in/janesmith,https://linkedin.com/company/innovate,https://innovate.io,Software,+0987654321,New York,NY,New York, NY,NEW
+3,Mike Johnson,Mike,Johnson,mike.j@startupxyz.com,CTO,StartupXYZ,StartupXYZ,https://linkedin.com/in/mikejohnson,https://linkedin.com/in/mikejohnson,https://linkedin.com/company/startupxyz,https://startupxyz.com,Software Development,+1122334455,Austin,TX,Austin, TX,NEW

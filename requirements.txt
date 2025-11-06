@@ -1,12 +1,11 @@
 langgraph
 langchain-core
-langchain_community 
+langchain_community
 langchain_google_genai
 langchain_openai
 langchain_chroma
 chromadb
 hubspot-api-client
-pyairtable
 google-api-python-client
 google-auth-oauthlib
 google-auth-httplib2
@@ -14,3 +13,7 @@ colorama
 python-dotenv
 bs4
 unstructured
+linkedin-api
+supabase
+requests
+html2text

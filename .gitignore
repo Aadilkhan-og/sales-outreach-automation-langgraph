@@ -1,0 +1,18 @@
+venv/
+.qodo
+__pycache__/
+server.log
+.env.example
+.env
+.env.template
+# Cache directory and files
+cache/
+llm_cache.db*
+*.db-shm
+*.db-wal
+# log files
+cost_tracking.json
+tool_response.json
+tool_responses.log
+bac/
+.claude

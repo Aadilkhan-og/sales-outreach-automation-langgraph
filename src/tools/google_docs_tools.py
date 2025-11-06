@@ -4,14 +4,36 @@ from googleapiclient.http import MediaFileUpload
 from src.utils import get_google_credentials
 
 class GoogleDocsManager:
-    def __init__(self):
-        self.docs_service = build('docs', 'v1', credentials=get_google_credentials())
-        self.drive_service = build('drive', 'v3', credentials=get_google_credentials())
+    def __init__(self, credentials=None):
+        """
+        Initialize Google Docs Manager with optional credentials.
+        If credentials are None, services will not be initialized (graceful degradation).
+        """
+        if credentials is None:
+            credentials = get_google_credentials()
+
+        self.credentials = credentials
+        self.docs_service = None
+        self.drive_service = None
+
+        if self.credentials:
+            try:
+                self.docs_service = build('docs', 'v1', credentials=self.credentials)
+                self.drive_service = build('drive', 'v3', credentials=self.credentials)
+                print("[OK] Google Docs/Drive services initialized successfully")
+            except Exception as e:
+                print(f"[WARNING] Failed to initialize Google services: {str(e)}")
+        else:
+            print("ℹ️ Google Docs Manager initialized without credentials (feature disabled)")
 
     def add_document(self, content, doc_title, folder_name, make_shareable=False, folder_shareable=False, markdown=False):
         """
         Create a Google Document and save it in the specified folder.
         """
+        if not self.docs_service or not self.drive_service:
+            print("[WARNING] Google Docs services not initialized. Skipping document creation.")
+            return None
+
         try:
             # Ensure the folder exists
             folder_id, folder_url = self._get_or_create_folder(folder_name, make_shareable=folder_shareable)
@@ -56,6 +78,10 @@ class GoogleDocsManager:
         """
         Retrieve the content of a Google Document by its URL.
         """
+        if not self.docs_service:
+            print("[WARNING] Google Docs service not initialized. Cannot retrieve document.")
+            return None
+
         try:
             # Extract the document ID from the URL
             match = re.search(r"/d/([a-zA-Z0-9-_]+)", doc_url)

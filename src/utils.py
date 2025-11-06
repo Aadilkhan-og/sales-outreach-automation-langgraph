@@ -17,23 +17,47 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
+# Gemini Model Configuration - Centralized model names
+# Updated to Gemini 2.0 models (Gemini 1.5 retired as of April 2025)
+GEMINI_FLASH_MODEL = "gemini-2.0-flash-exp"
+GEMINI_PRO_MODEL = "gemini-2.0-flash-thinking-exp"
+
 
 def get_current_date():
     return datetime.now().strftime("%Y-%m-%d")
 
 def get_google_credentials():
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
-    return creds
+    """
+    Get Google OAuth credentials for Docs/Drive/Sheets access.
+    Returns None if credentials files don't exist (optional feature).
+    """
+    try:
+        creds = None
+        if os.path.exists('token.json'):
+            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                # Check if credentials.json exists before trying to use it
+                if not os.path.exists('credentials.json'):
+                    print("⚠️ Google credentials.json not found. Google Docs/Drive features disabled.")
+                    print("   To enable: Follow Google OAuth setup at https://developers.google.com/workspace/guides/create-credentials")
+                    return None
+
+                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+                creds = flow.run_local_server(port=0)
+
+            if creds:
+                with open('token.json', 'w') as token:
+                    token.write(creds.to_json())
+
+        return creds
+    except Exception as e:
+        print(f"⚠️ Error loading Google credentials: {str(e)}")
+        print("   Google Docs/Drive features will be disabled.")
+        return None
     
 def get_report(reports, report_name: str):
     """
@@ -77,15 +101,19 @@ def get_llm_by_provider(llm_provider, model):
 def invoke_llm(
     system_prompt,
     user_message,
-    model="gemini-1.5-flash",  # Specify the model name according to the provider
+    model=None,  # Specify the model name according to the provider
     llm_provider="google",  # By default use Google as provider
     response_format=None
 ):
+    # Use default Gemini Flash model if none specified
+    if model is None:
+        model = GEMINI_FLASH_MODEL
+
     messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=user_message),
-    ]  
-    
+    ]
+
     # Get base llm
     llm = get_llm_by_provider(llm_provider, model)
     
