@@ -1,53 +1,44 @@
-# Relevance AI Business Profile Report
+# **Business Profile Report**
 
-## Company Overview:
+## **Company Overview:**
 
-* **Name & Description:** Relevance AI is a software development company specializing in no-code AI workforce automation platforms.  They build and manage AI teams comprised of agents and custom-built AI tools.
-* **Website & Location:** (Website URL not provided)  Headquarters: Surry Hills, Australia; Additional office: San Francisco, USA.
-* **Industry & Size:** Software Development; 57 employees.
-* **Mission:** To be the central platform for AI workforces, empowering users to automate tasks and processes without coding.
-* **Products and Services:**
-    * No-code platform for building and managing AI agents.
-    * Pre-built AI agents (e.g., Bosh, the sales agent).
-    * AI agent teams.
-    * Customizable AI tools.
-    * Integrations with various platforms.
-    * Support for multiple Large Language Models (LLMs) from OpenAI, Google, Meta, and Anthropic.
-    * Data storage options in US, EU, and AU.  SOC 2 (Type 2) certified and GDPR compliant.
+* **Name & Description:**  
+  Aethon Security is a specialized provider of cybersecurity and compliance services, focusing on organizations navigating the complexities of the Cybersecurity Maturity Model Certification (CMMC). The company is dedicated to enhancing cybersecurity and compliance for critical infrastructure organizations.
 
+* **Website & Location:**  
+  [Aethon Security's website](https://www.aethonsecurity.com/)  
+  Headquarters: Middleburg, Virginia
 
-## Lead Profile Summary: Benedek Zajkas
+* **Industry & Size:**  
+  Industry: Cybersecurity  
+  Employee Size: Not specified
 
-* **Professional Experience:**
-    * **Growth Operations Lead, Relevance AI (August 2021 – Present):** Focuses on growth and operational aspects of the company's AI-powered solutions.
-    * **Business Partner I Advisor, RAMI Fashion:** (Details not provided)
-    * **BizOps Lead & Co-founder, Kindly (digital bank):** (Details not provided)
-    * **Sales Operations Manager, Intland Software:** (Details not provided)
-    * **Management Consultant, Deloitte Hungary:** (Details not provided)
-    * **Market Research Analyst, EasyPark Group:** (Details not provided)
+* **Mission:**  
+  Aethon Security's mission is to empower businesses by providing reliable cybersecurity services that enhance security and compliance, particularly for critical infrastructure organizations.
 
-    His career trajectory showcases a progression from market research and consulting to sales operations and now growth operations within the technology sector, demonstrating a consistent focus on strategic growth and operational efficiency.
+* **Products and Services:**  
+  Aethon Security excels in delivering tailored cybersecurity solutions, including:
+  - **Aethon Compass:** Guiding organizations through the complexities of cybersecurity compliance.
+  - **Aethon Guide:** Providing tools and resources for effective cybersecurity measures.
+  - **Aethon Guard:** Focusing on advanced threat protection and risk management.
 
-* **Education:**
-    * Master's degree in Strategy Management and Innovation, DTU – Technical University of Denmark.
-    * Postgraduate Exchange in Entrepreneurship/Global business/Strategic planning, The University of Sydney Business School.
-    * Bachelor's degree in Engineering, Budapest University of Technology and Economics.
+## **Lead Profile Summary:**
 
-* **Skills & Expertise:**
-    * Sales Operations
-    * Business Development
-    * Strategy
-    * Operations Management
-    * Market Research
-    * AI-powered solutions
-    * Growth Strategy
-    * Scalable process implementation
+* **Professional Experience:**  
+  - **Current Role:** CEO of Aethon Security  
+    - Responsibilities include overseeing the company's strategic direction and ensuring adherence to industry standards and best practices.
+    - Focus on developing customized cybersecurity strategies for critical infrastructure organizations.
+  - **Past Experience:** Significant experience in the cybersecurity field, managing various compliance initiatives and security programs.
 
-* **Key Insights:**
-    * Extensive experience across diverse industries (Fintech, Software, Fashion).
-    * Proven track record of implementing scalable processes leading to significant year-over-year growth.
-    * Expertise in market research and analysis, leading to successful market entry strategies and acquisitions.
-    * Strong educational background in strategy, innovation, and entrepreneurship.
-    * His current role at Relevance AI aligns perfectly with his skills and experience, making him a valuable asset to the company's growth.  His understanding of both operational efficiency and strategic growth makes him an ideal partner for collaborations focused on scaling AI solutions.
+* **Education:**  
+  - Educational details are not available from the search results.
 
+* **Skills & Expertise:**  
+  - Expertise in cybersecurity and compliance, particularly CMMC and HIPAA.
+  - Strong leadership qualities with a commitment to innovation and excellence.
+  - Ability to foster a culture of continuous improvement within the organization.
 
+* **Key Insights:**  
+  - Derek Kernus demonstrates a strong commitment to enhancing the cybersecurity landscape through community engagement and partnerships, such as with ISC2.
+  - His leadership is characterized by a focus on empowering businesses to safeguard their data, which can be beneficial for potential collaborations in cybersecurity initiatives.
+  - Aethon Security's active involvement in local cybersecurity initiatives reflects a dedication to professional development within the industry, indicating potential opportunities for partnerships and community engagement.

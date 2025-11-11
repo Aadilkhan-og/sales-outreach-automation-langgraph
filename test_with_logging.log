@@ -1,0 +1,179 @@
+Traceback (most recent call last):
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\test_current_system.py", line 93, in test_system
+    output = app.invoke(inputs, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\pregel\main.py", line 3094, in invoke
+    for chunk in self.stream(
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\pregel\main.py", line 2679, in stream
+    for _ in runner.tick(
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\pregel\_runner.py", line 258, in tick
+    _panic_or_proceed(
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\pregel\_runner.py", line 520, in _panic_or_proceed
+    raise exc
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\pregel\_executor.py", line 80, in done
+    task.result()
+  File "C:\Users\oj\.pyenv\pyenv-win\versions\3.11.9\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oj\.pyenv\pyenv-win\versions\3.11.9\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Users\oj\.pyenv\pyenv-win\versions\3.11.9\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\pregel\_retry.py", line 42, in run_with_retry
+    return task.proc.invoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 656, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 400, in invoke
+    ret = self.func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\src\nodes.py", line 181, in analyze_blog_content
+    blog_content = scrape_website_to_markdown(blog_url)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oj\Downloads\sales-outreach-automation-langgraph\src\tools\base\markdown_scraper_tool.py", line 16, in scrape_website_to_markdown
+    raise Exception(f"Failed to fetch the URL. Status code: {response.status_code}")
+Exception: Failed to fetch the URL. Status code: 404
+During task with name 'analyze_blog_content' and id 'e7e31479-5332-986d-f4d9-691b853ec33c'
+Testing Current AI SDR System
+
+============================================================
+
+1. Checking Environment Variables...
+   ✅ LLM_PROVIDER: openai
+   ✅ OPENAI_API_KEY: sk-proj-GZ...
+   ✅ APOLLO_CSV_PATH: ./apollo-contacts-export.csv
+   ✅ SERPER_API_KEY: c3eec27505...
+   ✅ RAPIDAPI_KEY: rapid-api-...
+
+2. Checking CSV File...
+   ✅ CSV file found: 270 leads
+   Columns: ['First Name', 'Last Name', 'Title', 'Company Name', 'Company Name for Emails']...
+
+3. Initializing Lead Loader...
+[OK] Loaded 270 leads from CSV: ./apollo-contacts-export.csv
+   ✅ Lead loader initialized
+
+4. Testing with 1 Lead...
+   (This will take 2-5 minutes...)
+
+[INFO] Google Docs Manager disabled (SAVE_TO_GOOGLE_DOCS=False)
+   [STARTING] workflow...
+
+[33m----- Fetching new leads -----
+[0m
+[33m----- Fetched 270 leads -----
+[0m
+[33m----- Checking for remaining leads -----
+[0m
+[33m----- Found 270 more leads -----
+[0m
+[33m----- Searching Lead data on LinkedIn -----
+[0m
+
+================================================================================
+[LEAD RESEARCH] Starting research for:   (derek.kernus@aethonsecurity.com)
+================================================================================
+[LEAD RESEARCH] Extracted company from email: aethonsecurity.com
+[LEAD RESEARCH] Executing 3 search queries...
+[LEAD RESEARCH] Query 1/3: '  aethonsecurity.com'
+[LEAD RESEARCH] Found 10 results for query 1
+[LEAD RESEARCH] Query 2/3: '  LinkedIn'
+[LEAD RESEARCH] Found 10 results for query 2
+[LEAD RESEARCH] Query 3/3: '" " professional profile'
+[LEAD RESEARCH] Found 9 results for query 3
+[LEAD RESEARCH] Total search results collected: 15
+[LEAD RESEARCH] Invoking LLM for profile extraction from 15 results...
+
+[LEAD RESEARCH] ===== QUALITY ANALYSIS =====
+[LEAD RESEARCH] Profile Summary Length: 1764 characters
+[LEAD RESEARCH] Profile Summary Preview (first 300 chars):
+**Professional Profile: Derek Kernus**
+
+Derek Kernus is currently associated with Aethon Security, where he plays a pivotal role in delivering comprehensive cybersecurity and compliance services. Aethon Security specializes in customized cybersecurity solutions and CMMC compliance, focusing on empow...
+[LEAD RESEARCH] Quality Indicators (2/7 passed):
+[LEAD RESEARCH]   - has_job_title: FAIL
+[LEAD RESEARCH]   - has_company: PASS
+[LEAD RESEARCH]   - has_location: FAIL
+[LEAD RESEARCH]   - has_experience: FAIL
+[LEAD RESEARCH]   - has_education: FAIL
+[LEAD RESEARCH]   - is_not_empty: PASS
+[LEAD RESEARCH]   - no_error_message: FAIL
+[LEAD RESEARCH] WARNING: Low quality profile (score: 2/7)
+[LEAD RESEARCH] Extracting company URLs from search results...
+[LEAD RESEARCH] Found company website: https://www.aethonsecurity.com/
+[LEAD RESEARCH] Found company LinkedIn: https://www.linkedin.com/company/aethon-security
+[LEAD RESEARCH] ===== EXTRACTION COMPLETE =====
+[LEAD RESEARCH] Company Name: aethonsecurity.com
+[LEAD RESEARCH] Company Website: https://www.aethonsecurity.com/
+[LEAD RESEARCH] Company LinkedIn: https://www.linkedin.com/company/aethon-security
+================================================================================
+
+
+================================================================================
+[COMPANY RESEARCH] Starting company research
+================================================================================
+[COMPANY RESEARCH] Extracted company name from LinkedIn URL: aethon security
+[COMPANY RESEARCH] LinkedIn URL: https://www.linkedin.com/company/aethon-security
+[COMPANY RESEARCH] Executing 3 search queries...
+[COMPANY RESEARCH] Query 1/3: 'aethon security company'
+[COMPANY RESEARCH] Found 10 results for query 1
+[COMPANY RESEARCH] Query 2/3: 'aethon security about'
+[COMPANY RESEARCH] Found 10 results for query 2
+[COMPANY RESEARCH] Query 3/3: '"aethon security" company profile'
+[COMPANY RESEARCH] Found 10 results for query 3
+[COMPANY RESEARCH] Total search results collected: 15
+[COMPANY RESEARCH] Invoking LLM for company profile extraction from 15 results...
+
+[COMPANY RESEARCH] ===== QUALITY ANALYSIS =====
+[COMPANY RESEARCH] Company Description Length: 1860 characters
+[COMPANY RESEARCH] Company Description Preview (first 300 chars):
+**Company Profile: Aethon Security**
+
+Aethon Security is a specialized provider of cybersecurity and compliance services, focusing on critical infrastructure organizations. Founded in an unspecified year, the company is headquartered in an undisclosed location. Aethon Security offers a range of tail...
+[COMPANY RESEARCH] Quality Indicators (5/9 passed):
+[COMPANY RESEARCH]   - has_company_name: PASS
+[COMPANY RESEARCH]   - has_value_proposition: PASS
+[COMPANY RESEARCH]   - has_industry: PASS
+[COMPANY RESEARCH]   - has_products_services: FAIL
+[COMPANY RESEARCH]   - has_location: FAIL
+[COMPANY RESEARCH]   - has_size_info: FAIL
+[COMPANY RESEARCH]   - has_founding_info: PASS
+[COMPANY RESEARCH]   - is_substantial: PASS
+[COMPANY RESEARCH]   - no_error_message: FAIL
+[COMPANY RESEARCH] NOTICE: Moderate quality company profile (score: 5/9)
+[COMPANY RESEARCH] ===== EXTRACTION COMPLETE =====
+================================================================================
+
+[33m----- Scraping company website -----
+[0m
+
+[REPORT GENERATION] Generating General Lead Research Report...
+[REPORT GENERATION] Report Length: 2770 characters
+[REPORT GENERATION] Report Preview (first 200 chars):
+# **Business Profile Report**
+
+## **Company Overview:**
+
+* **Name & Description:**  
+  Aethon Security is a specialized provider of cybersecurity and compliance services, focusing on critical infrastr...
+[REPORT GENERATION] General Lead Research Report created successfully
+
+[33m----- Analyzing company main blog -----
+[0m
+[33m----- Analyzing recent news about company -----
+[0m
+[33m----- Analyzing company social media accounts -----
+[0m
+
+[ERROR] during execution:
+   Failed to fetch the URL. Status code: 404
+
+Full traceback:
+
+============================================================
+[FAILED] SYSTEM TEST FAILED
+============================================================
+
+Please fix the errors above before proceeding

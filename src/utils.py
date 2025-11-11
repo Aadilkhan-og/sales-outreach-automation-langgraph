@@ -17,7 +17,12 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-# Gemini Model Configuration - Centralized model names
+# LLM Model Configuration - Centralized model names
+# OpenAI Models (Default)
+OPENAI_GPT4O_MODEL = "gpt-4o"
+OPENAI_GPT4O_MINI_MODEL = "gpt-4o-mini"
+
+# Gemini Models (Alternative)
 # Updated to Gemini 2.0 models (Gemini 1.5 retired as of April 2025)
 GEMINI_FLASH_MODEL = "gemini-2.0-flash-exp"
 GEMINI_PRO_MODEL = "gemini-2.0-flash-thinking-exp"
@@ -71,14 +76,27 @@ def get_report(reports, report_name: str):
 def save_reports_locally(reports):
     # Define the local folder path
     reports_folder = "reports"
-    
+
     # Create folder if it does not exist
     if not os.path.exists(reports_folder):
         os.makedirs(reports_folder)
-    
+
     # Save each report as a file in the folder
     for report in reports:
-        file_path = os.path.join(reports_folder, f"{report.title}.txt")
+        # Skip empty strings or invalid report objects
+        if not report or isinstance(report, str):
+            continue
+
+        # Ensure title is a string (not a method)
+        title = str(report.title) if hasattr(report, 'title') else "Unknown_Report"
+        # Call title() if it's a method
+        if callable(title):
+            title = "Unknown_Report"
+
+        # Sanitize filename
+        title = title.replace('/', '_').replace('\\', '_').replace(':', '_')
+
+        file_path = os.path.join(reports_folder, f"{title}.txt")
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(report.content)
 
@@ -102,12 +120,25 @@ def invoke_llm(
     system_prompt,
     user_message,
     model=None,  # Specify the model name according to the provider
-    llm_provider="google",  # By default use Google as provider
+    llm_provider=None,  # LLM provider (openai, google, anthropic)
     response_format=None
 ):
-    # Use default Gemini Flash model if none specified
+    # Get provider from environment variable if not specified
+    if llm_provider is None:
+        llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
+
+    # Use appropriate default model based on provider
     if model is None:
-        model = GEMINI_FLASH_MODEL
+        if llm_provider == "openai":
+            model = OPENAI_GPT4O_MINI_MODEL  # Using mini for cost efficiency
+        elif llm_provider == "google":
+            model = GEMINI_FLASH_MODEL
+        elif llm_provider == "anthropic":
+            model = "claude-3-5-sonnet-20241022"
+        else:
+            # Default to OpenAI if unknown provider
+            llm_provider = "openai"
+            model = OPENAI_GPT4O_MINI_MODEL
 
     messages = [
         SystemMessage(content=system_prompt),
@@ -116,14 +147,14 @@ def invoke_llm(
 
     # Get base llm
     llm = get_llm_by_provider(llm_provider, model)
-    
+
     # If Response format is provided the use structured output
     if response_format:
         llm = llm.with_structured_output(response_format)
     else: # Esle use parse string output
         llm = llm | StrOutputParser()
-    
+
     # Invoke LLM
     output = llm.invoke(messages)
-    
+
     return output

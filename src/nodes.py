@@ -117,9 +117,8 @@ class OutReachAutomationNodes:
             # Scrape company website
             content = scrape_website_to_markdown(company_website)
             website_info = invoke_llm(
-                system_prompt=WEBSITE_ANALYSIS_PROMPT.format(main_url=company_website), 
+                system_prompt=WEBSITE_ANALYSIS_PROMPT.format(main_url=company_website),
                 user_message=content,
-                model=GEMINI_FLASH_MODEL,
                 response_format=WebsiteData
             )
 
@@ -143,18 +142,25 @@ class OutReachAutomationNodes:
         """
         
         # Generate general lead search report
+        print(f"\n[REPORT GENERATION] Generating General Lead Research Report...")
         general_lead_search_report = invoke_llm(
-            system_prompt=LEAD_SEARCH_REPORT_PROMPT, 
-            user_message=inputs,
-            model=GEMINI_FLASH_MODEL
+            system_prompt=LEAD_SEARCH_REPORT_PROMPT,
+            user_message=inputs
         )
-        
+
+        # Quality check for report
+        print(f"[REPORT GENERATION] Report Length: {len(general_lead_search_report)} characters")
+        print(f"[REPORT GENERATION] Report Preview (first 200 chars):")
+        print(f"{general_lead_search_report[:200]}...")
+
         lead_search_report = Report(
             title="General Lead Research Report",
             content=general_lead_search_report,
             is_markdown=True
         )
-        
+
+        print(f"[REPORT GENERATION] General Lead Research Report created successfully\n")
+
         return {
             "company_data": company_data,
             "reports": [lead_search_report]
@@ -165,25 +171,38 @@ class OutReachAutomationNodes:
         return {"reports": []}
     
     def analyze_blog_content(self, state: GraphState):
-        print(Fore.YELLOW + "----- Analyzing company main blog -----\n" + Style.RESET_ALL)  
+        print(Fore.YELLOW + "----- Analyzing company main blog -----\n" + Style.RESET_ALL)
         blog_analysis_report = ""
-        
+
         # Check if company has a blog
         company_data = state["company_data"]
         blog_url = company_data.social_media_links.blog
         if blog_url:
-            blog_content = scrape_website_to_markdown(blog_url)
-            prompt = BLOG_ANALYSIS_PROMPT.format(company_name=company_data.name)
-            blog_analysis_report = invoke_llm(
-                system_prompt=prompt, 
-                user_message=blog_content,
-                model=GEMINI_FLASH_MODEL
-            )
-            blog_analysis_report = Report(
-                title="Blog Analysis Report",
-                content=blog_analysis_report,
-                is_markdown=True
-            )
+            try:
+                print(f"[BLOG SCRAPING] Attempting to scrape: {blog_url}")
+                blog_content = scrape_website_to_markdown(blog_url)
+                print(f"[BLOG SCRAPING] Successfully scraped {len(blog_content)} characters")
+                prompt = BLOG_ANALYSIS_PROMPT.format(company_name=company_data.name)
+                blog_analysis_report = invoke_llm(
+                    system_prompt=prompt,
+                    user_message=blog_content
+                )
+                blog_analysis_report = Report(
+                    title="Blog Analysis Report",
+                    content=blog_analysis_report,
+                    is_markdown=True
+                )
+                print(f"[BLOG SCRAPING] Blog analysis report generated successfully")
+            except Exception as e:
+                print(f"[BLOG SCRAPING] WARNING: Failed to scrape blog - {str(e)}")
+                print(f"[BLOG SCRAPING] Continuing with empty blog report")
+                blog_analysis_report = Report(
+                    title="Blog Analysis Report",
+                    content="No blog content available (scraping failed)",
+                    is_markdown=True
+                )
+        else:
+            print(f"[BLOG SCRAPING] No blog URL found, skipping")
         return {"reports": [blog_analysis_report]}
     
     def analyze_social_media_content(self, state: GraphState):
@@ -206,8 +225,7 @@ class OutReachAutomationNodes:
             prompt = YOUTUBE_ANALYSIS_PROMPT.format(company_name=company_data.name)
             youtube_insight = invoke_llm(
                 system_prompt=prompt,
-                user_message=youtube_data,
-                model=GEMINI_FLASH_MODEL
+                user_message=youtube_data
             )
             youtube_analysis_report = Report(
                 title="Youtube Analysis Report",
@@ -253,8 +271,7 @@ class OutReachAutomationNodes:
         else:
             news_insight = invoke_llm(
                 system_prompt=news_analysis_prompt,
-                user_message=recent_news,
-                model=GEMINI_FLASH_MODEL
+                user_message=recent_news
             )
         
         news_analysis_report = Report(
@@ -301,17 +318,25 @@ class OutReachAutomationNodes:
         prompt = DIGITAL_PRESENCE_REPORT_PROMPT.format(
             company_name=state["company_data"].name, date=get_current_date()
         )
+
+        print(f"\n[REPORT GENERATION] Generating Digital Presence Report...")
         digital_presence_report = invoke_llm(
-            system_prompt=prompt, 
-            user_message=inputs,
-            model=GEMINI_FLASH_MODEL
-        ) 
-        
+            system_prompt=prompt,
+            user_message=inputs
+        )
+
+        # Quality check
+        print(f"[REPORT GENERATION] Report Length: {len(digital_presence_report)} characters")
+        print(f"[REPORT GENERATION] Report Preview (first 200 chars):")
+        print(f"{digital_presence_report[:200]}...")
+
         digital_presence_report = Report(
             title="Digital Presence Report",
             content=digital_presence_report,
             is_markdown=True
         )
+
+        print(f"[REPORT GENERATION] Digital Presence Report created successfully\n")
         return {"reports": [digital_presence_report]}
     
     def generate_full_lead_research_report(self, state: GraphState):
@@ -337,17 +362,25 @@ class OutReachAutomationNodes:
         prompt = GLOBAL_LEAD_RESEARCH_REPORT_PROMPT.format(
             company_name=state["company_data"].name, date=get_current_date()
         )
+
+        print(f"\n[REPORT GENERATION] Generating Global Lead Analysis Report...")
         full_report = invoke_llm(
-            system_prompt=prompt, 
-            user_message=inputs,
-            model=GEMINI_FLASH_MODEL
+            system_prompt=prompt,
+            user_message=inputs
         )
-        
+
+        # Quality check
+        print(f"[REPORT GENERATION] Report Length: {len(full_report)} characters")
+        print(f"[REPORT GENERATION] Report Preview (first 200 chars):")
+        print(f"{full_report[:200]}...")
+
         global_research_report = Report(
             title="Global Lead Analysis Report",
             content=full_report,
             is_markdown=True
         )
+
+        print(f"[REPORT GENERATION] Global Lead Analysis Report created successfully\n")
         return {"reports": [global_research_report]}
     
     @staticmethod
@@ -367,8 +400,7 @@ class OutReachAutomationNodes:
         # Scoring lead
         lead_score = invoke_llm(
             system_prompt=SCORE_LEAD_PROMPT,
-            user_message=global_research_report,
-            model=GEMINI_PRO_MODEL
+            user_message=global_research_report
         )
         return {"lead_score": lead_score.strip()}
 
@@ -393,7 +425,18 @@ class OutReachAutomationNodes:
         """
         # Checking if the lead score is 7 or higher
         print(f"Score: {state['lead_score']}")
-        is_qualified = float(state["lead_score"]) >= 7
+
+        # Extract numeric score from formatted string if needed
+        import re
+        score_str = str(state["lead_score"])
+        # Try to extract a number from the string (handles formats like "**Final Score: 3.5**")
+        match = re.search(r'(\d+\.?\d*)', score_str)
+        if match:
+            score = float(match.group(1))
+        else:
+            score = 0.0
+
+        is_qualified = score >= 7
         if is_qualified:
             print(Fore.GREEN + "Lead is qualified\n" + Style.RESET_ALL)
             return "qualified"
@@ -432,8 +475,7 @@ class OutReachAutomationNodes:
         # Generate report
         custom_outreach_report = invoke_llm(
             system_prompt=GENERATE_OUTREACH_REPORT_PROMPT,
-            user_message=inputs,
-            model=GEMINI_PRO_MODEL
+            user_message=inputs
         )
         
         # TODO Find better way to include correct links into the final report
@@ -452,8 +494,7 @@ class OutReachAutomationNodes:
         # Call our editor/proof-reader agent
         revised_outreach_report = invoke_llm(
             system_prompt=PROOF_READER_PROMPT,
-            user_message=inputs,
-            model=GEMINI_FLASH_MODEL
+            user_message=inputs
         )
 
         # Store report into google docs and get shareable link (if enabled)
@@ -505,7 +546,6 @@ class OutReachAutomationNodes:
         output = invoke_llm(
             system_prompt=PERSONALIZE_EMAIL_PROMPT,
             user_message=lead_data,
-            model=GEMINI_FLASH_MODEL,
             response_format=EmailResponse
         )
         
@@ -550,8 +590,7 @@ class OutReachAutomationNodes:
         # Generating SPIN questions
         spin_questions = invoke_llm(
             system_prompt=GENERATE_SPIN_QUESTIONS_PROMPT,
-            user_message=global_research_report,
-            model=GEMINI_FLASH_MODEL
+            user_message=global_research_report
         )
         
         inputs = f"""
@@ -567,8 +606,7 @@ class OutReachAutomationNodes:
         # Generating interview script
         interview_script = invoke_llm(
             system_prompt=WRITE_INTERVIEW_SCRIPT_PROMPT,
-            user_message=inputs,
-            model=GEMINI_FLASH_MODEL
+            user_message=inputs
         )
         
         interview_script_doc = Report(
@@ -613,9 +651,9 @@ class OutReachAutomationNodes:
         # save new record data, ensure correct fields are used
         new_data = {
             "Status": "ATTEMPTED_TO_CONTACT", # Set lead to attempted contact
-            "Score": state["lead_score"], 
-            "Analysis Reports": state["reports_folder_link"],
-            "Outreach Report": state["custom_outreach_report_link"],
+            "Score": state["lead_score"],
+            "Analysis Reports": state.get("reports_folder_link", "Local reports folder"),
+            "Outreach Report": state.get("custom_outreach_report_link", ""),
             "Last Contacted": get_current_date()
         }
         self.lead_loader.update_record(state["current_lead"].id, new_data)

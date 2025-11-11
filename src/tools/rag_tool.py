@@ -1,13 +1,29 @@
 import os
 from langchain_community.document_loaders import DirectoryLoader
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
+
+def get_embeddings():
+    """Get embeddings based on LLM provider configuration."""
+    llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
+
+    if llm_provider == "openai":
+        from langchain_openai import OpenAIEmbeddings
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    elif llm_provider == "google":
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    else:
+        # Default to OpenAI
+        from langchain_openai import OpenAIEmbeddings
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+
+    return embeddings
 
 def get_vector_store():
     """Get or create the vector store."""
     database_path = "database"
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
-    
+    embeddings = get_embeddings()
+
     if os.path.exists(database_path) and os.listdir(database_path):
         # Use the existing vector store
         vectorstore = Chroma(persist_directory=database_path, embedding_function=embeddings)
@@ -16,7 +32,7 @@ def get_vector_store():
         loader = DirectoryLoader("./data/case_studies")
         docs = loader.load()
         vectorstore = Chroma.from_documents(docs, embeddings, persist_directory=database_path)
-    
+
     return vectorstore
 
 def fetch_similar_case_study(description):

@@ -61,13 +61,20 @@ def research_lead_company(linkedin_url):
     @param linkedin_url: The company LinkedIn URL or company name to search.
     @return: Structured company information dictionary.
     """
+    print(f"\n{'='*80}")
+    print(f"[COMPANY RESEARCH] Starting company research")
+    print(f"{'='*80}")
+
     # Extract company identifier from LinkedIn URL
     company_identifier = linkedin_url
     if 'linkedin.com/company/' in linkedin_url:
         # Extract company name from LinkedIn URL
         company_identifier = linkedin_url.split('/company/')[-1].split('/')[0].replace('-', ' ')
+        print(f"[COMPANY RESEARCH] Extracted company name from LinkedIn URL: {company_identifier}")
+    else:
+        print(f"[COMPANY RESEARCH] Using provided identifier: {company_identifier}")
 
-    print(f"[INFO] Researching company via Google search: {company_identifier}",'linkedin_url',linkedin_url)
+    print(f"[COMPANY RESEARCH] LinkedIn URL: {linkedin_url}")
 
     # Search Google for the company with multiple queries
     queries = [
@@ -76,18 +83,26 @@ def research_lead_company(linkedin_url):
         f'"{company_identifier}" company profile'
     ]
 
+    print(f"[COMPANY RESEARCH] Executing {len(queries)} search queries...")
     all_search_results = []
-    for query in queries:
+    for idx, query in enumerate(queries, 1):
         try:
+            print(f"[COMPANY RESEARCH] Query {idx}/{len(queries)}: '{query}'")
             results = google_search(query)
             if results:
+                print(f"[COMPANY RESEARCH] Found {len(results)} results for query {idx}")
                 all_search_results.extend(results[:5])  # Get top 5 from each query
+            else:
+                print(f"[COMPANY RESEARCH] No results for query {idx}")
         except Exception as e:
             print(f"[WARNING] Search query failed for '{query}': {e}")
             continue
 
+    print(f"[COMPANY RESEARCH] Total search results collected: {len(all_search_results)}")
+
     if not all_search_results:
-        print(f"[INFO] No search results found for company: {company_identifier}")
+        print(f"[COMPANY RESEARCH] QUALITY WARNING: No search results found for company: {company_identifier}")
+        print(f"[COMPANY RESEARCH] Returning minimal company data")
         return {
             "company_name": company_identifier,
             "description": "No information available from search results",
@@ -116,13 +131,49 @@ def research_lead_company(linkedin_url):
         f"# Google Search Results:\n{search_data}"
     )
 
-    print(f"[INFO] Extracting company profile from {len(all_search_results)} search results")
+    print(f"[COMPANY RESEARCH] Invoking LLM for company profile extraction from {len(all_search_results)} results...")
 
     company_description = invoke_llm(
         system_prompt=EXTRACT_COMPANY_FROM_SEARCH,
-        user_message=extraction_input,
-        model=GEMINI_FLASH_MODEL
+        user_message=extraction_input
     )
+
+    # Quality analysis
+    print(f"\n[COMPANY RESEARCH] ===== QUALITY ANALYSIS =====")
+    print(f"[COMPANY RESEARCH] Company Description Length: {len(company_description)} characters")
+    print(f"[COMPANY RESEARCH] Company Description Preview (first 300 chars):")
+    print(f"{company_description[:300]}...")
+
+    # Check for quality indicators
+    quality_indicators = {
+        'has_company_name': company_identifier.lower() in company_description.lower(),
+        'has_value_proposition': any(word in company_description.lower() for word in ['provides', 'offers', 'delivers', 'specializes', 'focuses on']),
+        'has_industry': any(word in company_description.lower() for word in ['industry:', 'sector:', 'market:', 'technology', 'software', 'services']),
+        'has_products_services': any(word in company_description.lower() for word in ['products:', 'services:', 'solutions:', 'platform']),
+        'has_location': any(word in company_description.lower() for word in ['location:', 'headquarters:', 'based in', 'located in']),
+        'has_size_info': any(word in company_description.lower() for word in ['employees', 'company size:', 'team', 'staff']),
+        'has_founding_info': any(word in company_description.lower() for word in ['founded', 'established', 'year:', 'since']),
+        'is_substantial': len(company_description) > 200,
+        'no_error_message': 'not available' not in company_description.lower() and 'no information' not in company_description.lower()
+    }
+
+    quality_score = sum(quality_indicators.values())
+    total_checks = len(quality_indicators)
+
+    print(f"[COMPANY RESEARCH] Quality Indicators ({quality_score}/{total_checks} passed):")
+    for indicator, passed in quality_indicators.items():
+        status = "PASS" if passed else "FAIL"
+        print(f"[COMPANY RESEARCH]   - {indicator}: {status}")
+
+    if quality_score < 4:
+        print(f"[COMPANY RESEARCH] WARNING: Low quality company profile (score: {quality_score}/{total_checks})")
+    elif quality_score < 6:
+        print(f"[COMPANY RESEARCH] NOTICE: Moderate quality company profile (score: {quality_score}/{total_checks})")
+    else:
+        print(f"[COMPANY RESEARCH] SUCCESS: High quality company profile (score: {quality_score}/{total_checks})")
+
+    print(f"[COMPANY RESEARCH] ===== EXTRACTION COMPLETE =====")
+    print(f"{'='*80}\n")
 
     # Return structured company information
     # Note: Since we're extracting from text, we'll return a simplified structure
@@ -145,7 +196,6 @@ def generate_company_profile(company_linkedin_info, scraped_website):
     )
     profile_summary = invoke_llm(
         system_prompt=CREATE_COMPANY_PROFILE, 
-        user_message=inputs,
-        model=GEMINI_FLASH_MODEL
+        user_message=inputs
     )
     return profile_summary
